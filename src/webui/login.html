@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnowLuma 头衔管理 - 登录</title>
+<!-- BA 风格点击特效 -->
+<link rel="stylesheet" href="https://cdn.xcnahida.cn/ba-spark/spark.css">
+<link rel="stylesheet" href="/assets/login.css">
+</head>
+<body>
+<canvas id="sparkCanvas"></canvas>
+<script src="https://cdn.xcnahida.cn/ba-spark/spark.js" defer></script>
+
+<div class="card">
+  <h1>SnowLuma 头衔管理</h1>
+  <p class="sub">请输入访问令牌以继续</p>
+  <form onsubmit="return login()">
+    <label for="t">Token</label>
+    <input id="t" type="password" placeholder="32位十六进制 Token" autofocus>
+    <button class="btn" type="submit">登录</button>
+    <p class="err" id="err"></p>
+  </form>
+</div>
+
+<script src="/assets/app.js"></script>
+<script>
+const DEFAULT_TOKEN = '__TOKEN__';
+
+async function login() {
+  const el = document.getElementById('err');
+  const val = document.getElementById('t').value.trim();
+  if (!val) {
+    el.style.display = 'block';
+    el.textContent = '请输入 Token';
+    return false;
+  }
+  const res = await apiPost('/api/login', { token: val });
+  if (res.ok) { location.reload(); return false; }
+  el.style.display = 'block';
+  el.textContent = 'Token 错误';
+  return false;
+}
+</script>
+</body>
+</html>

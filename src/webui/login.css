@@ -1,0 +1,94 @@
+/* Blueaka 字体 */
+@import url('//cdn.jsdelivr.net/gh/VanillaNahida/BA-Spark-Cursor/fonts/Blueaka/Blueaka.css');
+@import url('//cdn.jsdelivr.net/gh/VanillaNahida/BA-Spark-Cursor/fonts/Blueaka_Bold/Blueaka_Bold.css');
+
+/* BA 风格鼠标指针 */
+@import url('https://cdn.xcnahida.cn/ba-spark/BlueArchiveCursor/cursor.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Blueaka", sans-serif;
+  font-weight: 400;
+}
+
+b, strong, h1, h2, h3, h4, h5, h6, .bold-text {
+  font-weight: 700;
+}
+
+body {
+  background: #0f0f14;
+  color: #d4d4d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.card {
+  background: #1a1a24;
+  border: 1px solid #2a2a3a;
+  border-radius: 12px;
+  padding: 32px;
+  width: 380px;
+  max-width: 90vw;
+}
+
+h1 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #e0e0e8;
+}
+
+.sub {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #aaa;
+}
+
+input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: #12121a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #e0e0e8;
+  outline: none;
+}
+
+input:focus {
+  border-color: #4fc3f7;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 16px;
+  font-size: 14px;
+  background: #2979ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn:hover {
+  background: #448aff;
+}
+
+.err {
+  color: #ef5350;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}

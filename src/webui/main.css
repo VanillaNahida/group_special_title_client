@@ -1,0 +1,236 @@
+/* Blueaka 字体 */
+@import url('//cdn.jsdelivr.net/gh/VanillaNahida/BA-Spark-Cursor/fonts/Blueaka/Blueaka.css');
+@import url('//cdn.jsdelivr.net/gh/VanillaNahida/BA-Spark-Cursor/fonts/Blueaka_Bold/Blueaka_Bold.css');
+
+/* BA 风格鼠标指针 */
+@import url('https://cdn.xcnahida.cn/ba-spark/BlueArchiveCursor/cursor.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Blueaka", sans-serif;
+  font-weight: 400;
+}
+
+b, strong, h1, h2, h3, h4, h5, h6, .bold-text {
+  font-weight: 700;
+}
+
+body {
+  background: #0f0f14;
+  color: #d4d4d8;
+  padding: 24px;
+}
+
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 20px;
+  color: #e0e0e8;
+}
+
+.logout {
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  background: none;
+  border: 1px solid #333;
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+.logout:hover {
+  color: #ef5350;
+  border-color: #ef5350;
+}
+
+.section {
+  background: #1a1a24;
+  border: 1px solid #2a2a3a;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section h2 {
+  font-size: 15px;
+  margin-bottom: 16px;
+  color: #4fc3f7;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  gap: 12px;
+}
+
+.row + .row {
+  border-top: 1px solid #1e1e2a;
+}
+
+.row label.label-text {
+  font-size: 13px;
+  color: #aaa;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.row input[type="text"],
+.row input[type="number"] {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #12121a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #e0e0e8;
+  outline: none;
+  max-width: 200px;
+}
+
+.row input[type="text"]:focus,
+.row input[type="number"]:focus {
+  border-color: #4fc3f7;
+}
+
+.row textarea {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #12121a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #e0e0e8;
+  outline: none;
+  resize: vertical;
+  height: 56px;
+}
+
+.row textarea:focus {
+  border-color: #4fc3f7;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #333;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: .2s;
+}
+
+.toggle input:checked + .slider {
+  background: #2979ff;
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 24px;
+  font-size: 13px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-save {
+  background: #2979ff;
+  color: #fff;
+}
+
+.btn-save:hover {
+  background: #448aff;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 999;
+  transition: opacity .3s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.toast-ok {
+  background: #1b5e20;
+  color: #a5d6a7;
+}
+
+.toast-err {
+  background: #b71c1c;
+  color: #ef9a9a;
+}
+
+.token-display {
+  font-size: 12px;
+  color: #888;
+  background: #12121a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  word-break: break-all;
+  margin-bottom: 16px;
+}
+
+.copied {
+  color: #4fc3f7;
+  font-size: 11px;
+  margin-left: 8px;
+  opacity: 0;
+  transition: opacity .2s;
+}

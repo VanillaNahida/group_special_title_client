@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnowLuma 头衔管理</title>
+<!-- BA 风格点击特效 -->
+<link rel="stylesheet" href="https://cdn.xcnahida.cn/ba-spark/spark.css">
+<link rel="stylesheet" href="/assets/main.css">
+</head>
+<body>
+<canvas id="sparkCanvas"></canvas>
+<script src="https://cdn.xcnahida.cn/ba-spark/spark.js" defer></script>
+
+<div class="container">
+  <div class="header">
+    <h1>SnowLuma 头衔管理</h1>
+    <button class="logout" onclick="doLogout()">退出登录</button>
+  </div>
+
+  <div class="section" style="padding:16px 20px">
+    <div style="font-size:13px;color:#aaa;margin-bottom:6px">
+      当前 Token
+      <button onclick="copyToken()" style="background:none;border:1px solid #333;color:#4fc3f7;font-size:11px;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:4px">复制</button>
+      <span class="copied" id="copied">已复制!</span>
+    </div>
+    <div class="token-display" id="tokenDisplay"></div>
+  </div>
+
+  <div class="section">
+    <h2>SnowLuma 连接</h2>
+    <div class="row">
+      <label class="label-text">WebSocket 地址</label>
+      <input type="text" id="wsUrl" style="max-width:300px">
+    </div>
+    <div class="row">
+      <label class="label-text">Access Token</label>
+      <input type="text" id="wsToken" style="max-width:300px">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>命令设置</h2>
+    <div class="row">
+      <label class="label-text">命令正则</label>
+      <input type="text" id="commandRegex" placeholder="^[#＃]头衔\s*(.*)" style="max-width:380px">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>冷却设置</h2>
+    <div class="row">
+      <label class="label-text">冷却时间（秒）</label>
+      <input type="number" id="cooldownSeconds" min="0" max="3600">
+    </div>
+    <div class="row">
+      <label class="label-text">无视 CD 的 QQ</label>
+      <textarea id="cdWhitelistQQs" rows="2"></textarea>
+    </div>
+    <div class="row">
+      <label class="label-text">发送 CD 提示</label>
+      <label class="toggle">
+        <input type="checkbox" id="enableCdTip">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>黑名单</h2>
+    <div class="row">
+      <label class="label-text">黑名单词</label>
+      <textarea id="blacklistWords" rows="2"></textarea>
+    </div>
+    <div class="row">
+      <label class="label-text">发送黑名单提示</label>
+      <label class="toggle">
+        <input type="checkbox" id="enableBlacklistTip">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="label-text">黑名单提示词</label>
+      <input type="text" id="blacklistDenyMsg" style="max-width:300px">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>消息设置</h2>
+    <div class="row">
+      <label class="label-text">发送成功提示</label>
+      <label class="toggle">
+        <input type="checkbox" id="enableSuccessTip">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="label-text">引用回复消息</label>
+      <label class="toggle">
+        <input type="checkbox" id="enableReplyQuote">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>权限设置</h2>
+    <div class="row">
+      <label class="label-text">检查群主权限</label>
+      <label class="toggle">
+        <input type="checkbox" id="enablePermissionCheck">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="label-text">发送权限不足提示</label>
+      <label class="toggle">
+        <input type="checkbox" id="enablePermissionDenyTip">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="label-text">权限不足提示词</label>
+      <input type="text" id="permissionDenyMsg" style="max-width:300px">
+    </div>
+  </div>
+
+  <div class="section" style="text-align:right">
+    <div class="btn-row" style="justify-content:flex-end">
+      <button class="btn btn-save" onclick="save()">保存配置</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/assets/app.js"></script>
+<script>
+var CONFIG_TOKEN = '';
+
+/** 从 API 加载配置并填充表单 */
+async function loadConfig() {
+  try {
+    var cfg = await apiGet('/api/config');
+    CONFIG_TOKEN = cfg.token;
+    document.getElementById('tokenDisplay').textContent = cfg.token;
+    document.getElementById('wsUrl').value = cfg.wsUrl || '';
+    document.getElementById('wsToken').value = cfg.wsToken || '';
+    document.getElementById('commandRegex').value = cfg.commandRegex || '^[#\uFF03]头衔\\s*(.*)';
+    document.getElementById('cooldownSeconds').value = cfg.cooldownSeconds;
+    document.getElementById('cdWhitelistQQs').value = (cfg.cdWhitelistQQs || []).join('\uff0c');
+    document.getElementById('blacklistWords').value = (cfg.blacklistWords || []).join('\uff0c');
+    document.getElementById('enableBlacklistTip').checked = cfg.enableBlacklistTip;
+    document.getElementById('blacklistDenyMsg').value = cfg.blacklistDenyMsg || '';
+    document.getElementById('enableCdTip').checked = cfg.enableCdTip;
+    document.getElementById('enableSuccessTip').checked = cfg.enableSuccessTip;
+    document.getElementById('enableReplyQuote').checked = cfg.enableReplyQuote;
+    document.getElementById('enablePermissionCheck').checked = cfg.enablePermissionCheck;
+    document.getElementById('enablePermissionDenyTip').checked = cfg.enablePermissionDenyTip;
+    document.getElementById('permissionDenyMsg').value = cfg.permissionDenyMsg || '';
+  } catch (e) {
+    location.reload();
+  }
+}
+
+/** 保存配置 */
+async function save() {
+  var body = {
+    wsUrl: document.getElementById('wsUrl').value.trim(),
+    wsToken: document.getElementById('wsToken').value.trim(),
+    commandRegex: document.getElementById('commandRegex').value.trim() || '^[#\uFF03]头衔\\s*(.*)',
+    cooldownSeconds: Math.max(0, parseInt(document.getElementById('cooldownSeconds').value, 10) || 30),
+    cdWhitelistQQs: splitList(document.getElementById('cdWhitelistQQs').value),
+    blacklistWords: splitList(document.getElementById('blacklistWords').value),
+    enableBlacklistTip: document.getElementById('enableBlacklistTip').checked,
+    blacklistDenyMsg: document.getElementById('blacklistDenyMsg').value.trim(),
+    enableCdTip: document.getElementById('enableCdTip').checked,
+    enableSuccessTip: document.getElementById('enableSuccessTip').checked,
+    enableReplyQuote: document.getElementById('enableReplyQuote').checked,
+    enablePermissionCheck: document.getElementById('enablePermissionCheck').checked,
+    enablePermissionDenyTip: document.getElementById('enablePermissionDenyTip').checked,
+    permissionDenyMsg: document.getElementById('permissionDenyMsg').value.trim(),
+  };
+  try {
+    var res = await apiPost('/api/config', body);
+    if (res.ok) return showToast('配置已保存', true);
+    showToast('保存失败', false);
+  } catch (e) {
+    showToast('请求失败', false);
+  }
+}
+
+async function copyToken() {
+  await navigator.clipboard.writeText(CONFIG_TOKEN);
+  var el = document.getElementById('copied');
+  el.style.opacity = '1';
+  setTimeout(function () { el.style.opacity = '0'; }, 1500);
+}
+
+// Ctrl+S 保存
+document.addEventListener('keydown', function (e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    save();
+  }
+});
+
+loadConfig();
+</script>
+</body>
+</html>
