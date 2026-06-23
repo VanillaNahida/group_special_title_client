@@ -13,16 +13,24 @@ export interface AppConfig {
   wsUrl: string;
   /** SnowLuma access_token */
   wsToken: string;
+  /** 首次连接失败时重试间隔（秒） */
+  connectRetryDelay: number;
   /** 触发命令正则（第一个捕获组为头衔文本） */
   commandRegex: string;
   /** 冷却时间（秒），群级别共享 */
   cooldownSeconds: number;
   /** 黑名单词列表 */
   blacklistWords: string[];
-  /** 是否发送黑名单触发提示 */
+  /** 是否发送黑名单词提示 */
   enableBlacklistTip: boolean;
-  /** 黑名单触发时的提示消息 */
+  /** 黑名单词触发时的提示消息 */
   blacklistDenyMsg: string;
+  /** 黑名单用户 QQ 列表 */
+  blacklistUsers: string[];
+  /** 是否发送黑名单用户提示 */
+  enableBlacklistUserTip: boolean;
+  /** 黑名单用户触发时的提示消息 */
+  blacklistUserDenyMsg: string;
   /** 无视 CD 的 QQ 号列表 */
   cdWhitelistQQs: string[];
   /** 是否发送设置成功提示 */
@@ -45,11 +53,15 @@ const defaultConfig: AppConfig = {
   token: randomBytes(16).toString('hex'),
   wsUrl: 'ws://127.0.0.1:3001/',
   wsToken: '',
+  connectRetryDelay: 10,
   commandRegex: '^[#\uFF03]头衔\\s*(.*)',
   cooldownSeconds: 30,
   blacklistWords: [],
   enableBlacklistTip: true,
   blacklistDenyMsg: '头衔包含禁止词汇',
+  blacklistUsers: [],
+  enableBlacklistUserTip: true,
+  blacklistUserDenyMsg: '你在黑名单中，无法设置头衔',
   cdWhitelistQQs: [],
   enableSuccessTip: true,
   enableReplyQuote: false,

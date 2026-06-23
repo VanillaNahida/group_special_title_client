@@ -22,20 +22,25 @@
     <div style="font-size:13px;color:#aaa;margin-bottom:6px">
       当前 Token
       <button onclick="copyToken()" style="background:none;border:1px solid #333;color:#4fc3f7;font-size:11px;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:4px">复制</button>
+      <button onclick="toggleToken()" id="tokenEye" style="background:none;border:1px solid #333;color:#888;font-size:11px;padding:2px 8px;border-radius:4px;cursor:pointer;margin-left:4px">显示</button>
       <span class="copied" id="copied">已复制!</span>
     </div>
-    <div class="token-display" id="tokenDisplay"></div>
+    <input type="password" id="tokenDisplay" class="token-display" readonly>
   </div>
 
   <div class="section">
     <h2>SnowLuma 连接</h2>
     <div class="row">
       <label class="label-text">WebSocket 地址</label>
-      <input type="text" id="wsUrl" style="max-width:300px">
+      <input type="text" id="wsUrl" placeholder="这里填写正向WebSocket地址。">
     </div>
     <div class="row">
       <label class="label-text">Access Token</label>
-      <input type="text" id="wsToken" style="max-width:300px">
+      <input type="text" id="wsToken" placeholder="留空则不校验">
+    </div>
+    <div class="row">
+      <label class="label-text">重连间隔（秒）</label>
+      <input type="number" id="connectRetryDelay" min="1" max="300" placeholder="10">
     </div>
   </div>
 
@@ -43,7 +48,7 @@
     <h2>命令设置</h2>
     <div class="row">
       <label class="label-text">命令正则</label>
-      <input type="text" id="commandRegex" placeholder="^[#＃]头衔\s*(.*)" style="max-width:380px">
+      <input type="text" id="commandRegex" placeholder="默认 ^[#＃]头衔\s*(.*)">
     </div>
   </div>
 
@@ -55,7 +60,7 @@
     </div>
     <div class="row">
       <label class="label-text">无视 CD 的 QQ</label>
-      <textarea id="cdWhitelistQQs" rows="2"></textarea>
+      <textarea id="cdWhitelistQQs" rows="2" placeholder="QQ号，逗号分隔"></textarea>
     </div>
     <div class="row">
       <label class="label-text">发送 CD 提示</label>
@@ -70,7 +75,7 @@
     <h2>黑名单</h2>
     <div class="row">
       <label class="label-text">黑名单词</label>
-      <textarea id="blacklistWords" rows="2"></textarea>
+      <textarea id="blacklistWords" rows="10" placeholder="禁止词，逗号分隔"></textarea>
     </div>
     <div class="row">
       <label class="label-text">发送黑名单提示</label>
@@ -81,7 +86,26 @@
     </div>
     <div class="row">
       <label class="label-text">黑名单提示词</label>
-      <input type="text" id="blacklistDenyMsg" style="max-width:300px">
+      <input type="text" id="blacklistDenyMsg" placeholder="头衔包含禁止词汇">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>黑名单用户</h2>
+    <div class="row">
+      <label class="label-text">黑名单用户 QQ</label>
+      <textarea id="blacklistUsers" rows="3" placeholder="QQ号，逗号分隔"></textarea>
+    </div>
+    <div class="row">
+      <label class="label-text">发送黑名单用户提示</label>
+      <label class="toggle">
+        <input type="checkbox" id="enableBlacklistUserTip">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <label class="label-text">黑名单用户提示词</label>
+      <input type="text" id="blacklistUserDenyMsg" placeholder="你在黑名单中，无法设置头衔">
     </div>
   </div>
 
@@ -121,7 +145,7 @@
     </div>
     <div class="row">
       <label class="label-text">权限不足提示词</label>
-      <input type="text" id="permissionDenyMsg" style="max-width:300px">
+      <input type="text" id="permissionDenyMsg" placeholder="非群主权限无法设置头衔">
     </div>
   </div>
 
@@ -143,15 +167,19 @@ async function loadConfig() {
   try {
     var cfg = await apiGet('/api/config');
     CONFIG_TOKEN = cfg.token;
-    document.getElementById('tokenDisplay').textContent = cfg.token;
+    document.getElementById('tokenDisplay').value = cfg.token;
     document.getElementById('wsUrl').value = cfg.wsUrl || '';
     document.getElementById('wsToken').value = cfg.wsToken || '';
+    document.getElementById('connectRetryDelay').value = cfg.connectRetryDelay;
     document.getElementById('commandRegex').value = cfg.commandRegex || '^[#\uFF03]头衔\\s*(.*)';
     document.getElementById('cooldownSeconds').value = cfg.cooldownSeconds;
     document.getElementById('cdWhitelistQQs').value = (cfg.cdWhitelistQQs || []).join('\uff0c');
     document.getElementById('blacklistWords').value = (cfg.blacklistWords || []).join('\uff0c');
     document.getElementById('enableBlacklistTip').checked = cfg.enableBlacklistTip;
     document.getElementById('blacklistDenyMsg').value = cfg.blacklistDenyMsg || '';
+    document.getElementById('blacklistUsers').value = (cfg.blacklistUsers || []).join('\uff0c');
+    document.getElementById('enableBlacklistUserTip').checked = cfg.enableBlacklistUserTip;
+    document.getElementById('blacklistUserDenyMsg').value = cfg.blacklistUserDenyMsg || '';
     document.getElementById('enableCdTip').checked = cfg.enableCdTip;
     document.getElementById('enableSuccessTip').checked = cfg.enableSuccessTip;
     document.getElementById('enableReplyQuote').checked = cfg.enableReplyQuote;
@@ -168,12 +196,16 @@ async function save() {
   var body = {
     wsUrl: document.getElementById('wsUrl').value.trim(),
     wsToken: document.getElementById('wsToken').value.trim(),
+    connectRetryDelay: Math.max(1, parseInt(document.getElementById('connectRetryDelay').value, 10) || 10),
     commandRegex: document.getElementById('commandRegex').value.trim() || '^[#\uFF03]头衔\\s*(.*)',
     cooldownSeconds: Math.max(0, parseInt(document.getElementById('cooldownSeconds').value, 10) || 30),
     cdWhitelistQQs: splitList(document.getElementById('cdWhitelistQQs').value),
     blacklistWords: splitList(document.getElementById('blacklistWords').value),
     enableBlacklistTip: document.getElementById('enableBlacklistTip').checked,
     blacklistDenyMsg: document.getElementById('blacklistDenyMsg').value.trim(),
+    blacklistUsers: splitList(document.getElementById('blacklistUsers').value),
+    enableBlacklistUserTip: document.getElementById('enableBlacklistUserTip').checked,
+    blacklistUserDenyMsg: document.getElementById('blacklistUserDenyMsg').value.trim(),
     enableCdTip: document.getElementById('enableCdTip').checked,
     enableSuccessTip: document.getElementById('enableSuccessTip').checked,
     enableReplyQuote: document.getElementById('enableReplyQuote').checked,
@@ -195,6 +227,20 @@ async function copyToken() {
   var el = document.getElementById('copied');
   el.style.opacity = '1';
   setTimeout(function () { el.style.opacity = '0'; }, 1500);
+}
+
+function toggleToken() {
+  var inp = document.getElementById('tokenDisplay');
+  var btn = document.getElementById('tokenEye');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '隐藏';
+    btn.style.color = '#4fc3f7';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '显示';
+    btn.style.color = '#888';
+  }
 }
 
 // Ctrl+S 保存

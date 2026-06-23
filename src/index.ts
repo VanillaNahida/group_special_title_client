@@ -29,13 +29,13 @@ function fmtTimestamp(): string {
 
 /** 日志辅助 */
 function logInfo(msg: string): void {
-  console.log(`${fmtTimestamp()} ${C.green}INFO  ${C.reset}${C.cyan}[SnowLuma]${C.reset} ${msg}`);
+  console.log(`${fmtTimestamp()} ${C.green}INFO  ${C.reset}${C.cyan}[自助头衔Client]${C.reset} ${msg}`);
 }
 function logEvent(msg: string): void {
   console.log(msg);
 }
 function logError(msg: string): void {
-  console.error(`${fmtTimestamp()} ${C.red}ERROR ${C.reset}${C.cyan}[SnowLuma]${C.reset} ${msg}`);
+  console.error(`${fmtTimestamp()} ${C.red}ERROR ${C.reset}${C.cyan}[自助头衔Client]${C.reset} ${msg}`);
 }
 
 /** 计算标题宽度：中文/全角 = 2，ASCII = 1，最多 12（即中文6字、英文12字） */
@@ -149,8 +149,26 @@ async function main() {
       return;
     }
 
-    // 黑名单词检查（cdWhitelistQQs 中的 QQ 跳过黑名单检查）
+    // 黑名单用户检查（cdWhitelistQQs 中的 QQ 跳过）
     const isBlacklistWhitelisted = cfg.cdWhitelistQQs.includes(String(userId));
+    if (!isBlacklistWhitelisted && cfg.blacklistUsers.includes(String(userId))) {
+      if (cfg.enableBlacklistUserTip && cfg.blacklistUserDenyMsg) {
+        await ctx.reply(
+          cfg.enableReplyQuote
+            ? reply(messageId).text(cfg.blacklistUserDenyMsg)
+            : text(cfg.blacklistUserDenyMsg),
+        );
+      }
+      logEvent(
+        `${fmtTimestamp()} ${C.yellow}BLOCK ${C.reset}` +
+          `${C.yellow}[${selfId}]${C.reset} ` +
+          `[黑名单用户] ${C.cyan}群:${groupId}${C.reset} ` +
+          `${C.blue}用户:${userId}${C.reset}`,
+      );
+      return;
+    }
+
+    // 黑名单词检查（cdWhitelistQQs 中的 QQ 跳过黑名单检查）
     if (!isBlacklistWhitelisted) {
       const hitWord = cfg.blacklistWords.find((w) => title.includes(w));
       if (hitWord) {
@@ -280,14 +298,35 @@ async function main() {
   });
 
   bot.on('close', () => {
-    console.log(`${fmtTimestamp()} ${C.yellow}WARN  ${C.reset}${C.cyan}[SnowLuma]${C.reset} WebSocket 已断开`);
+    console.log(`${fmtTimestamp()} ${C.yellow}WARN  ${C.reset}${C.cyan}[自助头衔Client]${C.reset} WebSocket 已断开`);
   });
 
   bot.on('error', (err) => {
-    console.error(`${fmtTimestamp()} ${C.red}ERROR ${C.reset}${C.cyan}[SnowLuma]${C.reset} WebSocket 错误:`, err);
+    console.error(`${fmtTimestamp()} ${C.red}ERROR ${C.reset}${C.cyan}[自助头衔Client]${C.reset} WebSocket 错误:`, err);
   });
 
-  await bot.connect();
+  /**
+   * 带重试的 WebSocket 连接
+   * SDK 的 reconnect: true 只处理已连接后的断线重连，
+   * 首次连接失败需要自行重试。
+   */
+  async function connectWithRetry(): Promise<void> {
+    const cfg = getConfig();
+    const delay = cfg.connectRetryDelay > 0 ? cfg.connectRetryDelay : 10;
+    while (true) {
+      try {
+        await bot.connect();
+        return;
+      } catch (err) {
+        logError(
+          `WebSocket 连接失败: ${err instanceof Error ? err.message : '未知错误'}, ${delay}秒后重试...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay * 1000));
+      }
+    }
+  }
+
+  await connectWithRetry();
   logInfo('自助头衔工具已启动');
 
   // 启动 WebUI 服务器
@@ -295,6 +334,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(`${fmtTimestamp()} ${C.red}FATAL ${C.reset}${C.cyan}[SnowLuma]${C.reset} 启动失败:`, err);
+  console.error(`${fmtTimestamp()} ${C.red}FATAL ${C.reset}${C.cyan}[自助头衔Client]${C.reset} 启动失败:`, err);
   process.exit(1);
 });

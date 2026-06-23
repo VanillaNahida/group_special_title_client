@@ -153,7 +153,7 @@ export function startWebServer(
     res.end();
   });
 
-  server.listen(port, '127.0.0.1', () => {
-    log(`WebUI 已启动: http://127.0.0.1:${port}/`);
+  server.listen(port, '0.0.0.0', () => {
+    log(`WebUI 已启动: http://0.0.0.0:${port}/`);
   });
 }
