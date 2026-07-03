@@ -46,7 +46,7 @@
 
 ## 环境要求
 
-- Windows 操作系统
+- Windows/Linux/MacOS 操作系统（支持运行Nodejs的系统）
 - Node.js >= 18
 - Chrome 浏览器
 - [SnowLuma](https://github.com/SnowLuma/SnowLuma)
