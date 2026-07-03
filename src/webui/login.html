@@ -17,7 +17,7 @@
   <p class="sub">请输入访问令牌以继续</p>
   <form onsubmit="return login()">
     <label for="t">Token</label>
-    <input id="t" type="password" placeholder="请输入 Token" autofocus>
+    <input id="t" type="password" placeholder="请输入 Token">
     <button class="btn" type="submit">登录</button>
     <p class="err" id="err"></p>
   </form>
@@ -26,6 +26,15 @@
 <script src="/assets/app.js"></script>
 <script>
 const DEFAULT_TOKEN = '__TOKEN__';
+
+// 如果已存在有效 cookie，自动跳转到主页
+(async function autoLogin() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) { location.href = '/'; return; }
+  } catch (_) { /* cookie 无效，显示登录表单 */ }
+  document.getElementById('t').focus();
+})();
 
 async function login() {
   const el = document.getElementById('err');
