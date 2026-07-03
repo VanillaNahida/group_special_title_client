@@ -1,0 +1,3 @@
+# group_special_title_client
+
+自助头衔客户端，需要配合NapCat或SnowLuma使用
