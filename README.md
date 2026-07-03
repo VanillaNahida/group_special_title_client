@@ -1,8 +1,6 @@
 # Group Special Title Client QQ群自助头衔
 
-[English](README_en.md) | 中文
-
-一个基于 [SnowLuma](https://github.com/Luma-Dream/SnowLuma) QQ机器人框架的群自助头衔客户端，支持群成员通过发送命令自助设置群专属头衔，并提供 WebUI 配置面板。
+一个基于 [SnowLuma](https://github.com/SnowLuma/SnowLuma) 和 [NapCat](https://github.com/NapNeko/NapCatQQ) QQ机器人框架的群自助头衔客户端，支持群成员通过发送命令自助设置群专属头衔，并提供 WebUI 配置面板。
 
 <div align="center">
 
