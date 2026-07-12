@@ -45,6 +45,10 @@ export interface AppConfig {
   enablePermissionDenyTip: boolean;
   /** 权限不足时的提示消息 */
   permissionDenyMsg: string;
+  /** 是否启用自动撤回消息 */
+  enableAutoRecall: boolean;
+  /** 自动撤回的目标用户 QQ 号列表 */
+  recallUserQQs: string[];
   /** WebUI 监听端口 */
   webuiPort: number;
 }
@@ -69,6 +73,8 @@ const defaultConfig: AppConfig = {
   enablePermissionCheck: true,
   enablePermissionDenyTip: true,
   permissionDenyMsg: '非群主权限无法设置头衔',
+  enableAutoRecall: false,
+  recallUserQQs: [],
   webuiPort: 30519,
 };
 

@@ -370,6 +370,24 @@ async function main() {
     // 读取最新配置（WebUI 可能已修改）
     const cfg = getConfig();
 
+    // 自动撤回消息：群号:QQ号 匹配则撤回
+    if (cfg.enableAutoRecall && cfg.recallUserQQs.includes(`${groupId}:${userId}`)) {
+      try {
+        await bot.call('delete_msg', { message_id: messageId });
+        logEvent(
+          `${fmtTimestamp()} ${C.green}RECALL${C.reset}` +
+            `${C.yellow}[${selfId}]${C.reset} ` +
+            `[撤回] ${C.cyan}群:${groupId}${C.reset} ` +
+            `${C.blue}用户:${userId}${C.reset}`,
+        );
+      } catch (err) {
+        logError(
+          `[撤回] 群:${groupId} 用户:${userId} ` +
+            `${err instanceof Error ? err.message : '未知错误'}`,
+        );
+      }
+    }
+
     // #status 命令：仅限 bot 自身（当前登录账号）触发，返回系统信息图片
     if (raw === '#status' || raw.startsWith('#status ')) {
       if (userId !== selfId) {
